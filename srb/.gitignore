@@ -1,0 +1,7 @@
+# SRB: no versionar binarios, logs, resultados ni la configuración de IP de cada VM
+bin/
+logs/
+resultados*/
+scripts/vms.conf
+__pycache__/
+*.o

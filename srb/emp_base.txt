@@ -1,0 +1,70 @@
+>> Arrancando topología 'base' (persistencia con 1 hilos)
+   el GT ve 1 trabajadores RMC registrados
+
+== corrida base_c3_r1: 3 clientes, 10s de calentamiento + 60s medidos ==
+   CONSULTA: n=13726 prom=10.45 ms std=3.15 p95=16.24 TPM=13726.0 timeouts=0
+   RESERVA:  n=2808 prom=12.68 ms std=3.00 p95=17.61 TPM=2808.0 rechazos=0 timeouts=0
+   errores=0 reintentos=0 cambios_de_GT=0 reservas_confirmadas=3258 reservas_sin_respuesta=0 sobrecarga=0
+   [GT-STATS] reparto entre VMs: base=19194 (100.0%)  
+   CPU durante la ventana medida (57s):
+   Nodo                   Componente      CPU (s) % de 1 núcleo
+   VM2-NBIG252            persistencia      14,00            26%
+   VM2-NBIG252            postgres          13,00            23%
+   VM3-NBIG263            cancelaciones      0,00             0%
+   VM3-NBIG263            gestor            11,00            20%
+   VM3-NBIG263            rmc               12,00            22%
+   VM1-NBIG250            generador          0,00             0%
+   >> nodo VM4-NBIG247            CPU total   8% de 4 núcleos (iowait 0%)
+   >> nodo VM2-NBIG252            CPU total  21% de 4 núcleos (iowait 1%)
+   >> nodo VM5-NBIG254            CPU total   9% de 4 núcleos (iowait 0%)
+   >> nodo VM3-NBIG263            CPU total  24% de 4 núcleos (iowait 0%)
+   >> nodo VM1-NBIG250            CPU total  10% de 4 núcleos (iowait 0%)
+   CPU por transacción (todas las VMs):  gestor=0,700 ms  postgres=0,828 ms  rmc=0,764 ms  cancelaciones=0,000 ms  persistencia=0,891 ms  TOTAL=3,183 ms
+   Componente que más CPU consume: persistencia (28% de la CPU del sistema)
+
+== corrida base_c5_r1: 5 clientes, 10s de calentamiento + 60s medidos ==
+   CONSULTA: n=7173 prom=25.03 ms std=5.65 p95=35.09 TPM=7173.0 timeouts=0
+   RESERVA:  n=3317 prom=25.38 ms std=5.54 p95=35.05 TPM=3317.0 rechazos=0 timeouts=0
+   MODIFIC.: n=1465 prom=24.37 ms std=5.90 p95=34.59 TPM=1465.0 rechazos=0 timeouts=0
+   errores=0 reintentos=0 cambios_de_GT=0 reservas_confirmadas=3906 reservas_sin_respuesta=0 sobrecarga=0
+   [GT-STATS] reparto entre VMs: base=13998 (100.0%)  
+   CPU durante la ventana medida (57s):
+   Nodo                   Componente      CPU (s) % de 1 núcleo
+   VM2-NBIG252            persistencia      13,00            24%
+   VM2-NBIG252            postgres          15,00            27%
+   VM3-NBIG263            cancelaciones      0,00             0%
+   VM3-NBIG263            gestor             9,00            16%
+   VM3-NBIG263            rmc               10,00            19%
+   VM1-NBIG250            generador          0,00             0%
+   >> nodo VM4-NBIG247            CPU total   7% de 4 núcleos (iowait 0%)
+   >> nodo VM2-NBIG252            CPU total  24% de 4 núcleos (iowait 1%)
+   >> nodo VM5-NBIG254            CPU total  10% de 4 núcleos (iowait 0%)
+   >> nodo VM3-NBIG263            CPU total  24% de 4 núcleos (iowait 0%)
+   >> nodo VM1-NBIG250            CPU total  10% de 4 núcleos (iowait 0%)
+   CPU por transacción (todas las VMs):  gestor=0,792 ms  postgres=1,321 ms  rmc=0,880 ms  cancelaciones=0,000 ms  persistencia=1,145 ms  TOTAL=4,138 ms
+   Componente que más CPU consume: postgres (32% de la CPU del sistema)
+
+== corrida base_c8_r1: 8 clientes, 10s de calentamiento + 60s medidos ==
+   CONSULTA: n=6066 prom=39.51 ms std=7.85 p95=52.91 TPM=6066.0 timeouts=0
+   RESERVA:  n=4213 prom=39.71 ms std=7.78 p95=53.13 TPM=4213.0 rechazos=0 timeouts=0
+   MODIFIC.: n=1851 prom=39.15 ms std=8.15 p95=53.36 TPM=1851.0 rechazos=0 timeouts=0
+   errores=0 reintentos=0 cambios_de_GT=0 reservas_confirmadas=4744 reservas_sin_respuesta=0 sobrecarga=0
+   [GT-STATS] reparto entre VMs: base=13645 (100.0%)  
+   CPU durante la ventana medida (57s):
+   Nodo                   Componente      CPU (s) % de 1 núcleo
+   VM2-NBIG252            persistencia      14,00            25%
+   VM2-NBIG252            postgres          16,00            29%
+   VM3-NBIG263            cancelaciones      0,00             0%
+   VM3-NBIG263            gestor             8,00            15%
+   VM3-NBIG263            rmc               10,00            18%
+   VM1-NBIG250            generador          0,00             0%
+   >> nodo VM4-NBIG247            CPU total   7% de 4 núcleos (iowait 0%)
+   >> nodo VM2-NBIG252            CPU total  24% de 4 núcleos (iowait 2%)
+   >> nodo VM5-NBIG254            CPU total   9% de 4 núcleos (iowait 0%)
+   >> nodo VM3-NBIG263            CPU total  21% de 4 núcleos (iowait 0%)
+   >> nodo VM1-NBIG250            CPU total   9% de 4 núcleos (iowait 0%)
+   CPU por transacción (todas las VMs):  gestor=0,694 ms  postgres=1,388 ms  rmc=0,868 ms  cancelaciones=0,000 ms  persistencia=1,215 ms  TOTAL=4,165 ms
+   Componente que más CPU consume: postgres (33% de la CPU del sistema)
+
+Listo. Archivos en resultados_empiricos/ . Para la Tabla 1:  python3 analisis/analisis.py 'resultados_empiricos/*_muestras.csv' --salida resultados_empiricos
+Guarde también la salida de esta ejecución (la CPU por componente es evidencia para el informe).

@@ -1,0 +1,56 @@
+== test1: carga ligera (clientes 2 a 30 solicitudes/min cada uno); debe atenderla solo VM3 ==
+Rampa de clientes: 2  (10s por paso + 5s de reposo, ~0 min)  umbral-out=50% umbral-in=20% metrica=max cubeta=60 fuga=0/s rpm/cliente=30 carga_cpu=10ms hilos_rmc=8
+>> Arrancando topología 'escalamiento' (persistencia con 4 hilos)
+   el GT ve 24 trabajadores RMC registrados
+
+Clientes ops/s     CONSULTA prom/p95 ms   RESERVA prom/p95 ms    MODIFIC prom/p95 ms    rechazos/errores
+2        1         21.05/29.42            27.95/50.63            19.69/21.77            0/0
+
+Reposo de 5 s sin carga (el GT libera las VMs que ya no hacen falta)...
+
+== Eventos del GT (escalado y cubeta) ==
+
+== Resumen del escalamiento ==
+# Escalamiento por CPU: resumen por paso de la rampa
+
+(clientes = 0: reposo al final, sin carga; muestra la CPU base de cada VM y el scale-in)
+
+| clientes | ops_s | rechazadas_s | cola_max | niveles_fin | cubeta | cpu_base | cpu_vm4 | cpu_vm5 | cpu_BD | cpu_VM1 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 1.0 | 0.0 | 0 | 1 | no | 17.3 | 6.7 | 7.9 | 9.7 | 4.6 |
+| 0 | 0.0 | 0.0 | 0 | 1 | no | 12.3 | 6.7 | 8.4 | 6.7 | 3.1 |
+
+Niveles activos: máximo 1 de 3; al final 1.
+Cambios de nivel (scale-out + scale-in): 0.
+El leaky bucket no llegó a activarse (el último nivel nunca se mantuvo sobre el umbral).
+CPU de la BD: media 8 %, máxima 45 %.
+CPU del generador (VM1): máxima 14 %.
+CPU máxima de base: 49 %.
+CPU máxima de vm4: 16 %.
+CPU máxima de vm5: 21 %.
+
+Gráfico: resultados_test1/escalamiento.png
+
+== Veredicto de test1: una sola VM es suficiente para el tráfico ==
+# Veredicto de test1: una sola VM es suficiente para el tráfico
+
+Configuración: clientes 2, 10 s por paso, 30 solicitudes/min por cliente (0 = sin pausa), CPU sintética 10 ms por solicitud, 8 hilos RMC por VM.
+
+- [OK] no hubo scale-out: siempre 1 nivel activo (máximo 1)
+- [OK] la CPU de base se mantuvo bajo el umbral de scale-out: pico 40 %, media 17 % (umbral 50 %)
+- [OK] todo el trabajo lo hizo base (12 solicitudes); vm4+vm5 no recibieron ninguna (0)
+- [OK] el leaky bucket no se activó y no hubo rechazos (0)
+- [OK] sin errores (0) y p95 máximo 50 ms (< 1000 ms)
+- [ATENCIÓN] la VM sostuvo el ritmo ofrecido (>= 85 %): 30 clientes: 0 de 0/s
+
+CPU de la BD (VM2): media 8 %, máxima 45 %.
+
+CPU máxima por VM durante la rampa: base 40 %, vm4 11 %, vm5 12 %
+
+**VEREDICTO TEST1: REVISAR (hay comprobaciones en ATENCIÓN)**
+Si falla el umbral de CPU, la carga de test1 es demasiada para una VM: baje T1_RPM o T1_PASOS (por ejemplo T1_RPM=300).
+
+Guardado en resultados_test1/veredicto.md
+
+Listo. Archivos en resultados_test1/ . Guarde también la salida de esta ejecución.
+(La topología sigue en marcha; para detenerla:  scripts/prueba_empirica.sh parar)

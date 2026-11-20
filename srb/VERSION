@@ -1,0 +1,1 @@
+SRB v3.5 (2026-11-18): test1 (~1 min) y test2 (~3 min) tres veces mas rapidos; test1/test2 con veredicto automatico; carga sintetica del RMC (--carga-cpu-ms); monitores monitor_vm.sh y monitor_bd.sh; contador de solicitudes en tiempo real en VM1 (--en-vivo)

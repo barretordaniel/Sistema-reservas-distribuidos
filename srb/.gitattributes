@@ -1,0 +1,3 @@
+# SRB: los scripts de las VMs (Linux) siempre con saltos de línea LF
+*.sh text eol=lf
+Makefile text eol=lf

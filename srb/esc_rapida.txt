@@ -1,0 +1,34 @@
+Rampa de clientes: 4 24 96  (15s por paso, ~0 min)  umbral-out=50% umbral-in=20% cubeta=60 fuga=0/s
+>> Arrancando topología 'escalamiento' (persistencia con 4 hilos)
+   el GT ve 12 trabajadores RMC registrados
+
+Clientes ops/s     CONSULTA prom/p95 ms   RESERVA prom/p95 ms    MODIFIC prom/p95 ms    rechazos/errores
+4        554       5.46/9.50              8.98/14.47             8.23/13.70             0/0
+24       882       23.67/35.84            29.86/44.90            28.41/43.91            0/0
+96       1091      83.75/113.59           88.56/120.35           87.10/120.10           0/0
+
+== Eventos del GT (escalado y cubeta) ==
+   [20:56:47.298] [GT1] ESCALA-OUT: CPU de 'base' = 58% >= 50% -> se activa 'vm4' (2/3 niveles)
+
+== Resumen del escalamiento ==
+# Escalamiento por CPU: resumen por paso de la rampa
+
+| clientes | ops_s | rechazadas_s | cola_max | niveles_fin | cubeta | cpu_base | cpu_vm4 | cpu_vm5 | cpu_BD | cpu_VM1 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 4 | 509.7 | 0.0 | 1 | 2 | no | 65.8 | 8.9 | 8.4 | 12806.8 | 61.3 |
+| 24 | 822.0 | 0.0 | 16 | 2 | no | 68.1 | 10.3 | 8.7 | 27837.5 | 53.5 |
+| 96 | 410.1 | 0.0 | 88 | 2 | no | 60.8 | 6.8 | 8.4 | 10830.1 | 39.5 |
+
+Niveles activos: máximo 2 de 3; al final 2.
+Cambios de nivel (scale-out + scale-in): 1.
+El leaky bucket no llegó a activarse (el último nivel nunca se mantuvo sobre el umbral).
+CPU de la BD: media 15080 %, máxima 36100 %.
+  -> la BD llegó a >= 85 %: es el recurso que limita el rendimiento total del sistema.
+CPU del generador (VM1): máxima 75 %.
+CPU máxima de base: 84 %.
+CPU máxima de vm4: 16 %.
+CPU máxima de vm5: 24 %.
+
+Gráfico: resultados_escalamiento/escalamiento.png
+
+Listo. Archivos en resultados_escalamiento/ . Guarde también la salida de esta ejecución.

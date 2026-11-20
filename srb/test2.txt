@@ -1,0 +1,81 @@
+== test2: rampa de clientes 16 32 64 128 256 sin pausa entre solicitudes; deben activarse vm4 y vm5 y la cubeta ==
+Rampa de clientes: 16 32 64 128 256  (10s por paso + 20s de reposo, ~1 min)  umbral-out=50% umbral-in=20% metrica=max cubeta=40 fuga=0/s rpm/cliente=0 carga_cpu=10ms hilos_rmc=8
+>> Arrancando topología 'escalamiento' (persistencia con 4 hilos)
+   el GT ve 24 trabajadores RMC registrados
+
+Clientes ops/s     CONSULTA prom/p95 ms   RESERVA prom/p95 ms    MODIFIC prom/p95 ms    rechazos/errores
+16       464       30.97/64.61            35.60/69.29            34.29/67.06            0/0
+32       895       32.48/45.05            36.66/50.19            35.73/50.92            0/0
+64       878       67.82/82.97            73.19/91.14            71.83/91.43            0/0
+128      887       67.99/82.54            72.79/87.18            71.45/86.47            0/0
+256      0         /                      /                      /                      0/0
+
+Reposo de 20 s sin carga (el GT libera las VMs que ya no hacen falta)...
+
+== Eventos del GT (escalado y cubeta) ==
+   [21:21:05.887] [GT1] ESCALA-OUT: CPU de 'base' = 94% >= 50% -> se activa 'vm4' (2/3 niveles)
+   [21:21:10.891] [GT1] ESCALA-OUT: CPU de 'vm4' = 90% >= 50% -> se activa 'vm5' (3/3 niveles)
+   [21:21:14.988] [GT1] CUBETA ACTIVA: todos los niveles disponibles (3) están al límite (CPU 'vm5' = 93%); salida libre, capacidad 40
+   [21:21:24.775] [GT-STATS] niveles activos=3/3  CUBETA ACTIVA
+   [21:21:34.776] [GT-STATS] niveles activos=3/3  CUBETA ACTIVA
+   [21:21:44.818] [GT-STATS] niveles activos=3/3  CUBETA ACTIVA
+   [21:21:54.266] [GT1] CUBETA LIBERADA: CPU de 'vm5' = 7%
+   [21:21:56.278] [GT1] ESCALA-IN: CPU de 'vm5' = 12% < 20% -> se libera (2/3 niveles)
+   [21:22:02.309] [GT1] ESCALA-IN: CPU de 'vm4' = 8% < 20% -> se libera (1/3 niveles)
+
+== Resumen del escalamiento ==
+# Escalamiento por CPU: resumen por paso de la rampa
+
+(clientes = 0: reposo al final, sin carga; muestra la CPU base de cada VM y el scale-in)
+
+| clientes | ops_s | rechazadas_s | cola_max | niveles_fin | cubeta | cpu_base | cpu_vm4 | cpu_vm5 | cpu_BD | cpu_VM1 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 16 | 362.7 | 0.0 | 8 | 3 | no | 77.7 | 39.2 | 16.0 | 37.5 | 14.2 |
+| 32 | 833.8 | 0.0 | 8 | 3 | sí | 93.4 | 84.0 | 86.5 | 40.8 | 22.2 |
+| 64 | 821.4 | 0.0 | 40 | 3 | sí | 88.7 | 88.0 | 81.8 | 47.6 | 25.3 |
+| 128 | 843.9 | 994.0 | 40 | 3 | sí | 89.4 | 84.4 | 84.4 | 50.2 | 40.7 |
+| 256 | 411.6 | 1376.5 | 40 | 3 | sí | 66.5 | 51.1 | 61.9 | 19.9 | 28.9 |
+| 0 | 0.0 | 0.0 | 0 | 1 | no | 11.6 | 6.7 | 8.2 | 9.4 | 3.6 |
+
+Niveles activos: máximo 3 de 3; al final 1.
+Cambios de nivel (scale-out + scale-in): 4.
+Leaky bucket activo durante 39 s; rechazadas por SOBRECARGA en total: 26076.
+CPU de la BD: media 28 %, máxima 69 %.
+CPU del generador (VM1): máxima 70 %.
+CPU máxima de base: 96 %.
+CPU máxima de vm4: 94 %.
+CPU máxima de vm5: 93 %.
+
+Gráfico: resultados_test2/escalamiento.png
+
+== Veredicto de test2: carga creciente hasta ocupar las 3 VMs ==
+# Veredicto de test2: carga creciente hasta ocupar las 3 VMs
+
+Configuración: clientes 16 32 64 128 256, 10 s por paso, 0 solicitudes/min por cliente (0 = sin pausa), CPU sintética 10 ms por solicitud, 8 hilos RMC por VM.
+
+- [OK] los niveles se activaron en orden 1 -> 2 -> 3 (secuencia vista: 1 -> 2 -> 3 -> 2 -> 1)
+- [OK] base llegó a la saturación: CPU sostenida (3 s) máxima 96 % (pico 96 %)
+- [OK] vm4 llegó a la saturación: CPU sostenida (3 s) máxima 93 % (pico 94 %)
+- [OK] vm5 llegó a la saturación: CPU sostenida (3 s) máxima 93 % (pico 93 %)
+- [OK] la capacidad crece al sumar VMs: 282 ops/s con 1 nivel -> 928 ops/s con 3 (x3.3; se espera >= x1.5)
+- [OK] el leaky bucket se activó (39 s)
+- [OK] la cubeta rechazó el exceso con SOBRECARGA (26076 solicitudes rechazadas; si es 0, la cola no llegó a llenarse: baje CUBETA_T2 o suba T2_PASOS)
+- [OK] sin errores (0); p95 máximo de lo atendido 91 ms (< 1000 ms gracias a la cubeta)
+- [OK] en el reposo final se liberaron las VMs: queda 1 nivel activo
+
+| niveles | segundos | ops_s_pico | cpu_base | cpu_vm4 | cpu_vm5 |
+|---|---|---|---|---|---|
+| 1 | 5 | 282 | 59 | 7 | 9 |
+| 2 | 5 | 604 | 94 | 62 | 24 |
+| 3 | 44 | 928 | 85 | 77 | 77 |
+
+CPU de la BD (VM2): media 28 %, máxima 69 %.
+
+CPU máxima por VM durante la rampa: base 96 %, vm4 94 %, vm5 93 %
+
+**VEREDICTO TEST2: APROBADO**
+
+Guardado en resultados_test2/veredicto.md
+
+Listo. Archivos en resultados_test2/ . Guarde también la salida de esta ejecución.
+(La topología sigue en marcha; para detenerla:  scripts/prueba_empirica.sh parar)
